@@ -294,6 +294,26 @@ NetHealth self-test — 2 connection(s)
 and `--speedtest` (40 MB ↓ / 15 MB ↑ caps): Starlink ≈ 300 ↓ / 25 ↑ Mbps,
 fibre-over-Wi-Fi ≈ 140 ↓ / 100–160 ↑ Mbps. (All `via TCP` confirms the sandbox is blocking ICMP, as expected.)
 
+## Publishing (GitHub + Pages)
+
+- Public repo: **https://github.com/pcwilliams/nethealth** (`main`; push over
+  SSH, since HTTPS has no stored credentials). Commits use the GitHub no-reply
+  address (`11552527+pcwilliams@users.noreply.github.com`, repo-local config)
+  so no personal email is published.
+- **Pages:** `.github/workflows/pages.yml` copies `*.html` + `docs/` into
+  `_site` and deploys on pushes touching those paths. Live at
+  https://pcwilliams.github.io/nethealth/ (`index.html` landing page →
+  `architecture.html`, `tutorial.html`). Page footers link to the GitHub
+  README, not `README.md` (Pages doesn't render Markdown here).
+- `.gitignore` excludes `build/`, `xcuserdata/`, `.DS_Store` and `.claude/`
+  (local permissions full of home-directory paths).
+- **README screenshot** `docs/screenshot.png`: window capture with shadow
+  (`screencapture -l <CGWindowID>`), then every `192.168.x.x` except the dish is
+  located with Vision OCR (`VNRecognizeTextRequest` + `boundingBox(for:)`) and
+  pixelated with Pillow; re-run OCR on the output to confirm nothing is
+  readable. Docs show the Mac's own LAN addresses as `192.168.1.x` /
+  `192.168.108.x`.
+
 ## App icon
 
 Generated programmatically by `generate_icons.py` (Python/Pillow), **modelled on
