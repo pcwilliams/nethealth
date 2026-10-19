@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetHealth — Build Tutorial</title>
+<style>
+    :root {
+        --bg: #070b10;
+        --panel: #111a22;
+        --accent: #5ad1ff;
+        --green: #3ddc97;
+        --text: #e6edf3;
+        --muted: #8b98a5;
+        --border: #1e2a34;
+        --red: #f0698a;
+        --amber: #f0c84a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+        padding: 40px 20px;
+    }
+    .container { max-width: 860px; margin: 0 auto; }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--green), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 2.5rem; }
+    h2 { font-size: 1.7rem; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); color: var(--accent); }
+    h3 { font-size: 1.25rem; margin: 1.75rem 0 0.75rem; color: var(--green); }
+    p { margin-bottom: 1rem; color: var(--text); }
+    .prompt {
+        background: var(--panel);
+        border-left: 3px solid var(--accent);
+        padding: 14px 18px;
+        border-radius: 6px;
+        margin: 1.25rem 0;
+        font-style: italic;
+        color: var(--text);
+    }
+    .prompt::before { content: "💬 "; }
+    code { background: var(--panel); padding: 2px 6px; border-radius: 4px; font-family: "SF Mono", Monaco, monospace; font-size: 0.9rem; color: var(--accent); }
+    pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin-bottom: 1rem; line-height: 1.5; }
+    pre code { background: none; padding: 0; color: var(--text); }
+    .step { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px 24px 20px; margin: 1.5rem 0; }
+    .step-num { display: inline-block; background: var(--green); color: var(--bg); width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 700; margin-right: 8px; }
+    .step h3 { margin-top: 0.75rem; }
+    .step h3 .step-num { margin-left: 0; }
+    .aha { background: rgba(240, 200, 74, 0.10); border-left: 3px solid var(--amber); padding: 12px 16px; border-radius: 4px; margin: 1rem 0; }
+    .aha strong { color: var(--amber); }
+    footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--muted); text-align: center; }
+    a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>NetHealth</h1>
+    <p class="subtitle">How this app was built — a conversational walkthrough</p>
+
+    <h2>Build Tutorial</h2>
+    <p>NetHealth was built the way every app here is: one idea, then a series of small
+    refinements. Here is the journey, prompt by prompt — including the wrong turn that
+    taught us the most.</p>
+
+    <div class="step">
+        <span class="step-num">1</span>
+        <h3>The idea</h3>
+        <div class="prompt">I would like a new project — a macOS app that shows me a beautiful picture of my internet health. It should ping my Starlink router regularly, and a known public website, and show me the ping time graphically and gorgeously in a resizeable window.</div>
+        <p>We picked three things to watch — the Starlink <strong>router</strong>
+        (<code>192.168.1.1</code>), the <strong>dish</strong> itself
+        (<code>192.168.100.1</code>), and <strong>Cloudflare</strong>
+        (<code>1.1.1.1</code>) as a public anchor — and an <em>aurora ribbon</em>
+        aesthetic: flowing translucent gradients on a deep dark background.</p>
+        <div class="prompt">solarsystem is a good one to look at!</div>
+        <p>So the project was scaffolded in the house style — hand-authored
+        <code>project.pbxproj</code>, MVVM, zero dependencies — modelled on the
+        SolarSystem project's macOS target.</p>
+    </div>
+
+    <div class="step">
+        <span class="step-num">2</span>
+        <h3>Write, build, test — hands-off</h3>
+        <div class="prompt">please write, build and test — you don't need my permissions for that.</div>
+        <p>The model layer (<code>PingSample</code>, <code>HealthState</code>,
+        <code>TargetHealth</code>), an <code>actor</code> ping service, the view model's
+        1 Hz probe loop, and the SwiftUI dashboard all went in, and the project built
+        clean on the first real compile after a couple of small fixes.</p>
+    </div>
+
+    <div class="step">
+        <span class="step-num">3</span>
+        <h3>Testing without a screen</h3>
+        <div class="prompt">you can use command line args to test without having to screengrab the graphics to see if it is working.</div>
+        <p>Exactly right. A <code>--selftest</code> launch argument measures each target
+        once and prints the result, and a <code>--netdiag</code> mode reports the raw
+        result and <code>errno</code> of every socket step. That let the whole
+        networking path be verified head-less:</p>
+        <pre><code>./run-macos.sh Debug --selftest</code></pre>
+    </div>
+
+    <div class="step">
+        <span class="step-num">4</span>
+        <h3>The wrong turn that taught us the most</h3>
+        <p>The first design used real ICMP echo (actual ping). It built and ran — and
+        reported <em>every</em> target, even loopback, as unreachable. The shell could
+        ping fine, so it wasn't the network. <code>--netdiag</code> found the culprit:</p>
+        <pre><code>ICMP socket(): ok fd=3
+raw: sendto -> 16
+raw: recv -> -1 errno=1 (Operation not permitted)
+TCPPinger.ping(1.1.1.1:443): 30.74 ms</code></pre>
+        <div class="aha"><strong>Aha:</strong> the macOS App Sandbox lets you
+        <em>create</em> and <em>send</em> on an unprivileged ICMP datagram socket, but
+        <em>denies the inbound echo reply</em> with <code>EPERM</code>. So we measure
+        latency by <strong>TCP connect time</strong> instead — one round trip, a close
+        proxy for ICMP RTT — and fall back to it automatically the instant ICMP is
+        refused.</p></div>
+        <p>With that, the self-test lit up green against real hardware (the
+        <code>via</code> column — added later — names the winning probe):</p>
+        <pre><code>  [OK]   Router      192.168.1.1          4.5 ms  via TCP
+  [OK]   Dish        192.168.100.1        2.6 ms  via TCP
+  [OK]   Cloudflare  1.1.1.1             25.0 ms  via TCP
+3/3 targets reachable</code></pre>
+        <div class="prompt">looks pretty good — and works!</div>
+    </div>
+
+    <div class="step">
+        <span class="step-num">5</span>
+        <h3>Making it move</h3>
+        <div class="prompt">Do you think we can animate the charts between the timed steps? That would look smoother.</div>
+        <p>The data only changes once a second, so the ribbon visibly stepped. A
+        <code>TimelineView</code> 60 Hz clock was wired in to interpolate between samples,
+        plus eased vertical re-scaling so spikes don't snap.</p>
+        <div class="prompt">I think the graph is just compressing as time goes on, rather than scrolling through time. I think scrolling through time might be better, don't you?</div>
+        <p>Spot on. The fix was to position each point by its real <em>age</em>
+        (<code>now − sample.date</code>) across a fixed 90-second window, so the ribbon
+        scrolls continuously and old data slides off the left edge.</p>
+    </div>
+
+    <div class="step">
+        <span class="step-num">6</span>
+        <h3>Polish: legibility and smoothness</h3>
+        <div class="prompt">larger y axis text please, my eyesight isn't good enough!</div>
+        <p>The Y-axis labels were bumped to 15 pt semibold, brighter and left-aligned.</p>
+        <div class="prompt">it does seem to stutter often when the data updates, looks like it shifts slightly one way then the other.</div>
+        <p>A real artifact: with age-based positioning the newest point drifts left for a
+        second, then a fresh point pops in at the right edge — a ~7 px right-then-left
+        sawtooth. The fix was to <strong>pin the leading edge</strong>: hold the latest
+        value out to <code>x = width</code> so the trace only ever glides left. We also
+        gave the auto-scale <strong>hysteresis</strong> so it can't flip-flop between
+        ranges.</p>
+        <div class="prompt">ooh seems much better now — the smoothness.</div>
+    </div>
+
+    <div class="step">
+        <span class="step-num">7</span>
+        <h3>Leave the dish alone</h3>
+        <div class="prompt">the dish may have crashed because it was being poked. So let's not do that!</div>
+        <div class="prompt">no the normal icmp and tcp connect probe are fine — let's not try and access its api</div>
+        <p>The dish had gone unresponsive while being probed once a second, and the
+        Phase 2 plan was to talk to its gRPC API on port <code>9200</code>. The catch:
+        that same <code>SpaceX.API.Device.Device/Handle</code> endpoint which serves
+        telemetry also accepts <code>reboot</code> and <code>stow</code>. So port 9200
+        was dropped from the dish's probe list entirely — the dish is now timed with a
+        gentle TCP connect on its web ports only, and Phase 2's gRPC plan was shelved.</p>
+        <div class="prompt">is there any doc out there about this kind of issue with starlink dishes?</div>
+        <p>No smoking-gun bug for a bare TCP poke, but the community
+        <code>starlink-grpc-tools</code> independently warns about polling the dish too
+        often and ships explicit &ldquo;dish reboot detected&rdquo; handling — enough to
+        justify keeping NetHealth a strictly passive monitor.</p>
+    </div>
+
+    <div class="step">
+        <span class="step-num">8</span>
+        <h3>Show the measurement path</h3>
+        <div class="prompt">let's have the display show whether icmp or tcp is being successful.</div>
+        <p>Since ICMP is tried first and silently falls through to TCP, it wasn't obvious
+        which path was actually live. The probe now returns a <code>Reading(rtt,
+        method)</code>; the method rides along in each <code>PingSample</code> and shows
+        as a small badge on every stat card — a muted <code>TCP</code>, or a green
+        <code>ICMP</code> when real echo works. <code>--selftest</code> prints it too.
+        On a sandboxed build every card reads <code>TCP</code>, making the sandbox/ICMP
+        story self-evident at a glance.</p>
+    </div>
+
+    <div class="step">
+        <span class="step-num">9</span>
+        <h3>Make it work on any network, not just Starlink</h3>
+        <div class="prompt">now I want to extend it slightly so it handles networks other than a local starlink setup. Like right now, connected via wifi to my fiber router… update the app to handle changing router address, and grey out / omit the starlink section if we can't reach the starlink dish.</div>
+        <p>Three changes, and the app stopped being Starlink-specific. <strong>The Router
+        target now follows the real default gateway</strong> — a new <code>Gateway</code>
+        helper reads the kernel routing table via <code>sysctl(NET_RT_DUMP)</code> (the
+        in-process equivalent of <code>route -n get default</code>, and sandbox-safe), so
+        on the fiber LAN it lit up at <code>192.168.108.1</code> instead of the hard-coded
+        Starlink <code>192.168.1.1</code>. <strong>The dish became an optional target</strong>:
+        an optional target that has never answered is omitted entirely — from the cards, the
+        graph ribbons, and the overall-health tint — so the missing dish no longer painted
+        the whole window "Offline". And a subtle but important fix: <strong>a connection-refused
+        RST now counts as reachable</strong>, since it's a complete round trip from a host
+        that's simply got no open web port — which is exactly how a bare fiber gateway reads
+        as a healthy local hop.</p>
+        <p>The owner chose <em>omit</em> over <em>grey-out</em> for the absent dish, so on
+        fiber the dashboard cleanly shows two cards (Router + Cloudflare) and two ribbons,
+        the header reading a calm green "Excellent". <code>--selftest</code> confirmed it,
+        printing the detected gateway and reporting the dish as <code>[--] not present
+        (optional)</code> rather than a failure:</p>
+        <pre><code>NetHealth self-test — measuring 3 targets
+  default gateway: 192.168.108.1
+  [OK]   Router      192.168.108.1        2.8 ms  via TCP
+  [--]   Dish        192.168.100.1    not present (optional)
+  [OK]   Cloudflare  1.1.1.1             10.2 ms  via TCP
+2/3 targets reachable</code></pre>
+    </div>
+
+    <div class="step">
+        <span class="step-num">10</span>
+        <h3>Every connection at once — and a bandwidth test</h3>
+        <div class="prompt">On this Mac I have wifi connecting to a fibre broadband router capable of 5Gb/sec, and wired ethernet connected to a starlink router/dish. I'd like to extend the app to show all current network connections, rather than just the default. And also include a periodic bandwidth test. Stacked charts would be nice — one for each distinct connection. How does that sound?</div>
+        <p>A look at the routing table showed both links live at once: Ethernet
+        (<code>en0</code>) → Starlink as the <em>primary</em> default route, and Wi-Fi
+        (<code>en1</code>) → fibre as a second, <code>RTF_IFSCOPE</code>-scoped default route.
+        That scoping is the crux — ordinary sockets only ever use the primary, so to see the
+        fibre at all every probe has to be <strong>pinned to its interface</strong>.</p>
+        <div class="prompt">perhaps once per minute for now. upload too. and yes please — take a snapshot first, and go ahead.</div>
+        <p>After snapshotting to <code>nethealth copy</code>, <code>Gateway</code> learned to
+        return <em>every</em> default route with its interface index and a primary flag;
+        <code>ConnectionDiscovery</code> merges those with <code>NWPathMonitor</code>'s
+        interface types into one <code>NetworkConnection</code> per link, each with its own
+        Router, optional Dish and Cloudflare targets. <code>TCPPinger</code> binds each socket
+        with <code>IP_BOUND_IF</code>, and the self-test proved it: Cloudflare read 24.5 ms via
+        Starlink and 11.4 ms via fibre in the same run, with the dish answering only on the
+        Ethernet link.</p>
+        <p>The bandwidth test talks to Cloudflare's <code>__down</code>/<code>__up</code>
+        endpoints. URLSession can't be pinned to an interface, so it's HTTP/1.1 hand-rolled over
+        <code>NWConnection</code> with <code>requiredInterface</code>. Two probes with
+        <code>curl</code> shaped the design: a single stream only reached ~170 Mbps even on the
+        fibre (so: six parallel streams), and requests over 100 MB get a 403 (so: split the
+        byte cap across streams). Each direction stops at 4 s or 120 MB ↓ / 40 MB ↑.</p>
+        <pre><code>NetHealth speed test — 2 connection(s), 6 streams, ≤4s / ≤120 MB down, ≤40 MB up
+  Ethernet  en0  gw 192.168.1.1  (primary)
+    ↓ download     326.6 Mbps    120.0 MB in 3.3s
+    ↑ upload        24.5 Mbps     12.6 MB in 4.4s
+  Wi-Fi  en1  gw 192.168.108.1
+    ↓ download     156.1 Mbps     75.9 MB in 4.2s
+    ↑ upload       101.6 Mbps     40.0 MB in 2.5s</code></pre>
+        <p>Parallel <code>curl</code> over <code>en1</code> agreed — the Mac's Wi-Fi hop, not
+        the 5 Gb/s fibre, is the limit. The window now stacks a panel per connection
+        (badged <code>PRIMARY</code> / <code>STARLINK</code>), each with its own ribbon, stat
+        cards and a Bandwidth card with live Mbps and a sparkline. Test spans are shaded on
+        the graph, which made bufferbloat visible straight away: Wi-Fi latency to Cloudflare
+        climbed from ~10 ms to over 100 ms during the download.</p>
+        <p>Two things surfaced on the first live run. Cloudflare answered one Wi-Fi download
+        with <strong>HTTP 429</strong> — once a minute is enthusiastic — so a rate-limited link
+        now backs off 5 → 30 minutes and keeps showing its last good reading. And the fibre
+        router briefly dropped most probes right after a burst of back-to-back tests; a new
+        <code>--watch</code> mode (the GUI's concurrent probe loop, logged per tick) showed the
+        probe logic was sound and the router recovered on its own.</p>
+    </div>
+
+    <div class="step">
+        <span class="step-num">11</span>
+        <h3>Lining up the cards, and getting downloads back</h3>
+        <div class="prompt">let's line the number panels up, so if there's no dish entry, just leave a gap. And neither connection is showing download numbers</div>
+        <div class="prompt">yes one bandwidth test every 5 mins is fine. Perhaps reduce the amount of data per test too?</div>
+        <p>The missing downloads weren't the same 429 as before. A single 1 MB
+        <code>curl</code> got a 200 while the app's 20 MB requests failed, and probing sizes
+        found the line: after all that testing, Cloudflare answered <strong>429 to any single
+        download of 10 MB or more</strong>, but happily served a dozen back-to-back 5 MB requests
+        on one connection. So each download stream now loops <strong>4 MB keep-alive
+        requests</strong>, reading <code>Content-Length</code> to know when to ask for the next.
+        The default schedule became every 5 minutes, and the per-test caps dropped from
+        120/40 MB to <strong>40 MB ↓ / 15 MB ↑</strong> with a 3 s limit — at most ~55 MB per
+        link per test, and still ~300 Mbps on Starlink and ~140 Mbps on the fibre Wi-Fi.</p>
+        <p>The cards now sit in fixed Router · Dish · Cloudflare · Bandwidth slots so the two
+        panels line up, with a gap where the Wi-Fi link has no dish. The first try hid the
+        Starlink dish too: the panel only observed its connection, so it never noticed the
+        dish's <code>everReachable</code> flip. A small <code>CardSlot</code> view that observes
+        its own target fixed it.</p>
+    </div>
+
+    <div class="step">
+        <span class="step-num">12</span>
+        <h3>Every ten minutes, and when did we test?</h3>
+        <div class="prompt">let's run the bandwidth test every 10 minutes, to minimize data even more. Let's make sure the first test is soon after app start though. Let's put a timestamp of when we tested in each bandwidth chart.</div>
+        <p>A new <em>Every 10 min</em> option became the default, halving the worst case to
+        ~330 MB per link per hour. The first test still fires about 5 seconds after launch,
+        and now it won't silently slip a whole interval if the links (and the
+        <code>NWInterface</code> handles that pin each test) haven't been discovered yet: it
+        simply retries every 5 seconds until they're there. Each Bandwidth card gained a
+        footer line, <code>tested 07:16:50</code>, next to any error, while the header keeps
+        the relative "18s ago · next 9m".</p>
+    </div>
+
+    <div class="step">
+        <span class="step-num">13</span>
+        <h3>How fast is the hop to the router?</h3>
+        <div class="prompt">how easy is a bandwidth test to router to add?</div>
+        <div class="prompt">yes let's do that? It would be very helpful</div>
+        <p>A true throughput test to the router turned out not to be practical: both routers
+        only serve a ~5 KB admin page, with no speed-test endpoint or iperf3, and hammering a
+        router's web UI is the same kind of risk we'd already ruled out for the dish. But the
+        OS already knows the answer to the useful question. CoreWLAN gives the Wi-Fi transmit
+        rate, band, channel, width and signal, and the interface's <code>ifi_baudrate</code>
+        gives the Ethernet speed. No packets needed, and it works inside the sandbox.</p>
+        <p>The first reading explained a mystery from earlier: the Mac's Wi-Fi was on
+        <strong>2.4 GHz, channel 11, 20 MHz wide, at ~137 Mbps</strong>, which is why the
+        5 Gb/s fibre kept measuring ~140 Mbps. Each panel header now carries a link chip
+        (<code>1 Gb/s</code> on Ethernet, <code>137 Mbps · 2.4 GHz ch 11 · −65 dBm</code> on
+        Wi-Fi). It turns amber when Wi-Fi is on 2.4 GHz or the last download got within reach
+        of the link rate, and hovering shows the Wi-Fi mode, noise and SNR.
+        <code>--selftest</code> prints it too.</p>
+    </div>
+
+    <h2>Where it stands</h2>
+    <p>Phase 1 is complete and verified, and now watches every connection at once: each
+    link (Ethernet → Starlink, Wi-Fi → fibre, …) gets its own stacked panel with
+    interface-pinned probes and a download/upload bandwidth test every 10 minutes. The Router target
+    follows each link's gateway, the Starlink dish is an optional target that's omitted
+    when it's not there, live stats carry an ICMP/TCP method badge, and a 60 fps aurora
+    ribbon scrolls smoothly through time in a resizable frameless window. The original
+    Phase 2 — rich Starlink dish telemetry over the dish gRPC API — was <strong>shelved by
+    choice</strong>: poking that API appears able to crash the dish, and the endpoint that
+    serves telemetry also accepts reboot/stow, so NetHealth stays a passive latency monitor
+    that never speaks to the dish's API.</p>
+
+    <footer>
+        NetHealth · See <a href="architecture.html">architecture.html</a> for diagrams
+        and <a href="https://github.com/pcwilliams/nethealth#readme">the README</a> for usage, and <a href="https://github.com/pcwilliams/nethealth">the source on GitHub</a>.
+    </footer>
+</div>
+</body>
+</html>

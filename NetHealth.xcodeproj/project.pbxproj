@@ -1,0 +1,299 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BB0000000000000000000001 /* NetHealthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000001 /* NetHealthApp.swift */; };
+		BB0000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000002 /* ContentView.swift */; };
+		BB0000000000000000000003 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000003 /* Models.swift */; };
+		BB0000000000000000000004 /* ICMPPinger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000004 /* ICMPPinger.swift */; };
+		BB0000000000000000000005 /* TCPPinger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000005 /* TCPPinger.swift */; };
+		BB0000000000000000000006 /* PingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000006 /* PingService.swift */; };
+		BB0000000000000000000007 /* NetHealthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000007 /* NetHealthViewModel.swift */; };
+		BB0000000000000000000008 /* AuroraGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000008 /* AuroraGraphView.swift */; };
+		BB0000000000000000000031 /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000031 /* NetworkConnection.swift */; };
+		BB0000000000000000000032 /* SpeedTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000032 /* SpeedTester.swift */; };
+		BB0000000000000000000033 /* ConnectionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000033 /* ConnectionPanel.swift */; };
+		BB0000000000000000000034 /* BandwidthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000034 /* BandwidthCard.swift */; };
+		BB0000000000000000000035 /* LinkStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000035 /* LinkStatus.swift */; };
+		BB0000000000000000000009 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000009 /* StatCard.swift */; };
+		BB000000000000000000000B /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000B /* Gateway.swift */; };
+		BB000000000000000000000A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000A /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA0000000000000000000001 /* NetHealthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetHealthApp.swift; sourceTree = "<group>"; };
+		AA0000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000003 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		AA0000000000000000000004 /* ICMPPinger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICMPPinger.swift; sourceTree = "<group>"; };
+		AA0000000000000000000005 /* TCPPinger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCPPinger.swift; sourceTree = "<group>"; };
+		AA0000000000000000000006 /* PingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingService.swift; sourceTree = "<group>"; };
+		AA0000000000000000000007 /* NetHealthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetHealthViewModel.swift; sourceTree = "<group>"; };
+		AA0000000000000000000008 /* AuroraGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraGraphView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000031 /* NetworkConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnection.swift; sourceTree = "<group>"; };
+		AA0000000000000000000032 /* SpeedTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedTester.swift; sourceTree = "<group>"; };
+		AA0000000000000000000033 /* ConnectionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionPanel.swift; sourceTree = "<group>"; };
+		AA0000000000000000000034 /* BandwidthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandwidthCard.swift; sourceTree = "<group>"; };
+		AA0000000000000000000035 /* LinkStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStatus.swift; sourceTree = "<group>"; };
+		AA0000000000000000000009 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
+		AA000000000000000000000B /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
+		AA000000000000000000000A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA000000000000000000000C /* NetHealth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NetHealth.entitlements; sourceTree = "<group>"; };
+		C0000000000000000000C009 /* NetHealth.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NetHealth.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C0000000000000000000C008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C0000000000000000000C002 = {
+			isa = PBXGroup;
+			children = (
+				C0000000000000000000C003 /* NetHealth */,
+				C0000000000000000000C004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C0000000000000000000C003 /* NetHealth */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000001 /* NetHealthApp.swift */,
+				AA0000000000000000000002 /* ContentView.swift */,
+				AA0000000000000000000003 /* Models.swift */,
+				AA0000000000000000000004 /* ICMPPinger.swift */,
+				AA0000000000000000000005 /* TCPPinger.swift */,
+				AA0000000000000000000006 /* PingService.swift */,
+				AA0000000000000000000007 /* NetHealthViewModel.swift */,
+				AA0000000000000000000008 /* AuroraGraphView.swift */,
+				AA0000000000000000000009 /* StatCard.swift */,
+				AA0000000000000000000034 /* BandwidthCard.swift */,
+				AA0000000000000000000035 /* LinkStatus.swift */,
+				AA0000000000000000000033 /* ConnectionPanel.swift */,
+				AA0000000000000000000032 /* SpeedTester.swift */,
+				AA0000000000000000000031 /* NetworkConnection.swift */,
+				AA000000000000000000000B /* Gateway.swift */,
+				AA000000000000000000000A /* Assets.xcassets */,
+				AA000000000000000000000C /* NetHealth.entitlements */,
+			);
+			path = NetHealth;
+			sourceTree = "<group>";
+		};
+		C0000000000000000000C004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C0000000000000000000C009 /* NetHealth.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C0000000000000000000C005 /* NetHealth */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0000000000000000000C00B /* Build configuration list for PBXNativeTarget "NetHealth" */;
+			buildPhases = (
+				C0000000000000000000C006 /* Sources */,
+				C0000000000000000000C007 /* Resources */,
+				C0000000000000000000C008 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NetHealth;
+			productName = NetHealth;
+			productReference = C0000000000000000000C009 /* NetHealth.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C0000000000000000000C001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					C0000000000000000000C005 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+				};
+			};
+			buildConfigurationList = C0000000000000000000C00A /* Build configuration list for PBXProject "NetHealth" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C0000000000000000000C002;
+			productRefGroup = C0000000000000000000C004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C0000000000000000000C005 /* NetHealth */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C0000000000000000000C007 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB000000000000000000000A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C0000000000000000000C006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB0000000000000000000001 /* NetHealthApp.swift in Sources */,
+				BB0000000000000000000002 /* ContentView.swift in Sources */,
+				BB0000000000000000000003 /* Models.swift in Sources */,
+				BB0000000000000000000004 /* ICMPPinger.swift in Sources */,
+				BB0000000000000000000005 /* TCPPinger.swift in Sources */,
+				BB0000000000000000000006 /* PingService.swift in Sources */,
+				BB0000000000000000000007 /* NetHealthViewModel.swift in Sources */,
+				BB0000000000000000000008 /* AuroraGraphView.swift in Sources */,
+				BB0000000000000000000009 /* StatCard.swift in Sources */,
+				BB0000000000000000000034 /* BandwidthCard.swift in Sources */,
+				BB0000000000000000000035 /* LinkStatus.swift in Sources */,
+				BB0000000000000000000033 /* ConnectionPanel.swift in Sources */,
+				BB0000000000000000000032 /* SpeedTester.swift in Sources */,
+				BB0000000000000000000031 /* NetworkConnection.swift in Sources */,
+				BB000000000000000000000B /* Gateway.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C0000000000000000000C00C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ENABLE_TESTABILITY = YES;
+			};
+			name = Debug;
+		};
+		C0000000000000000000C00D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MTL_FAST_MATH = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_OPTIMIZATION_LEVEL = s;
+				ENABLE_NS_ASSERTIONS = NO;
+			};
+			name = Release;
+		};
+		C0000000000000000000C00E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NetHealth/NetHealth.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L7GB763YG3;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pwilliams.NetHealth;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C0000000000000000000C00F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NetHealth/NetHealth.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L7GB763YG3;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pwilliams.NetHealth;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C0000000000000000000C00A /* Build configuration list for PBXProject "NetHealth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0000000000000000000C00C /* Debug */,
+				C0000000000000000000C00D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0000000000000000000C00B /* Build configuration list for PBXNativeTarget "NetHealth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0000000000000000000C00E /* Debug */,
+				C0000000000000000000C00F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C0000000000000000000C001 /* Project object */;
+}

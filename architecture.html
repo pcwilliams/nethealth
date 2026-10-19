@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetHealth — Architecture</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+    :root {
+        --bg: #070b10;
+        --panel: #111a22;
+        --accent: #3ddc97;   /* aurora green */
+        --accent2: #5ad1ff;  /* aurora cyan */
+        --text: #e6edf3;
+        --muted: #8b98a5;
+        --border: #1e2a34;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        padding: 40px 20px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 2rem; }
+    h2 {
+        font-size: 1.6rem;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+        color: var(--accent);
+    }
+    h3 { font-size: 1.2rem; margin: 1.5rem 0 0.75rem; color: var(--text); }
+    p { margin-bottom: 1rem; color: var(--muted); }
+    .diagram {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 1.5rem 0;
+        overflow-x: auto;
+    }
+    .mermaid { text-align: center; }
+    .mermaid svg { max-width: 100%; height: auto; }
+    code {
+        background: var(--panel);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: "SF Mono", Monaco, monospace;
+        font-size: 0.9rem;
+        color: var(--accent);
+    }
+    pre {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+    }
+    pre code { background: none; padding: 0; color: var(--text); }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    th { color: var(--accent2); }
+    td { color: var(--muted); }
+    .note {
+        background: rgba(61, 220, 151, 0.10);
+        border-left: 3px solid var(--accent);
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin: 1rem 0;
+        color: var(--text);
+    }
+    footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        text-align: center;
+    }
+    a { color: var(--accent2); }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>NetHealth</h1>
+    <p class="subtitle">Internet-health monitor — architecture &amp; data flow</p>
+
+    <h2>System Overview</h2>
+    <p>NetHealth watches <strong>every network connection the Mac has</strong> — e.g.
+    Ethernet → Starlink and Wi-Fi → fibre at the same time. Each link becomes a
+    <code>NetworkConnection</code> with its own targets (that link's router, the
+    optional Starlink dish, Cloudflare), probed once a second with sockets
+    <em>pinned to that interface</em>, plus a periodic bandwidth test. The UI stacks one
+    panel per connection, each with its own time-scrolling aurora ribbon. Pure SwiftUI /
+    MVVM, zero external dependencies.</p>
+    <div class="diagram">
+        <div class="mermaid">
+graph TD
+    M["📡 NWPathMonitor<br/>interface types + NWInterface"] --> D
+    R["🧭 Gateway.defaultRoutes()<br/>sysctl(NET_RT_DUMP)<br/>one default route per interface"] --> D
+    D["ConnectionDiscovery<br/>→ [ConnectionInfo]"] --> VM["NetHealthViewModel<br/>@MainActor"]
+    VM -->|"1 Hz · connection × target<br/>interfaceIndex"| B["PingService (actor)"]
+    B --> T["TCPPinger<br/>IP_BOUND_IF · RST = up"]
+    B --> C["ICMPPinger<br/>(EPERM in sandbox)"]
+    VM -->|"scheduled · one link at a time"| S["SpeedTester<br/>NWConnection requiredInterface<br/>6 streams ↓ then ↑"]
+    S -->|"HTTPS"| CF["speed.cloudflare.com<br/>__down / __up"]
+    VM --> NC["NetworkConnection ×N<br/>TargetHealth ×3 · SpeedResults · SpeedWindows · LinkStatus"]
+    L["🔗 LinkReader<br/>CoreWLAN (Wi-Fi rate · band · RSSI)<br/>if_data baud (Ethernet)"] -->|"every 5 s"| NC
+    NC --> P["ConnectionPanel ×N (stacked)"]
+    P --> G["AuroraGraphView<br/>ribbons + shaded test windows"]
+    P --> SC["StatCard ×N"]
+    P --> BC["BandwidthCard<br/>↓/↑ Mbps · sparkline"]
+    style R fill:#10241b,stroke:#ffd23d,color:#e6edf3
+    style M fill:#10241b,stroke:#ffd23d,color:#e6edf3
+    style L fill:#10241b,stroke:#ffd23d,color:#e6edf3
+    style VM fill:#10241b,stroke:#3ddc97,color:#e6edf3
+    style S fill:#1a1430,stroke:#c78cff,color:#e6edf3
+    style G fill:#10241b,stroke:#5ad1ff,color:#e6edf3
+</div>
+    </div>
+
+    <h2>Connections: one default route per interface</h2>
+    <p>With two live links macOS keeps two IPv4 default routes. The <em>primary</em> one
+    is unscoped; the other carries <code>RTF_IFSCOPE</code> and is used only by sockets
+    bound to its interface. So discovery reads every default route, and every probe binds
+    to its link — without that, all probes would silently measure the primary link.</p>
+    <div class="diagram">
+        <div class="mermaid">
+graph LR
+    RT["routing table"] --> E0["default → 192.168.1.1<br/>en0 Ethernet · unscoped<br/><b>PRIMARY</b>"]
+    RT --> E1["default → 192.168.108.1<br/>en1 Wi-Fi · RTF_IFSCOPE"]
+    E0 --> P0["Panel: Ethernet · STARLINK<br/>Router · Dish · Cloudflare"]
+    E1 --> P1["Panel: Wi-Fi<br/>Router · Cloudflare<br/>(dish never answers here → omitted)"]
+    style E0 fill:#10241b,stroke:#3ddc97,color:#e6edf3
+    style E1 fill:#10241b,stroke:#5ad1ff,color:#e6edf3
+</div>
+    </div>
+    <div class="note"><strong>Pinning.</strong> BSD sockets use
+    <code>setsockopt(IPPROTO_IP, IP_BOUND_IF, ifindex)</code>; Network.framework uses
+    <code>NWParameters.requiredInterface</code>. Both work inside the App Sandbox.
+    URLSession has no public equivalent, which is why the bandwidth test speaks HTTP/1.1
+    over <code>NWConnection</code> itself.</div>
+    <div class="note"><strong>Local link rate.</strong> No traffic is sent to the router
+    (its only web server is a ~5 KB admin page, so it can't be a speed-test endpoint). Instead
+    <code>LinkReader</code> asks the OS: CoreWLAN for Wi-Fi transmit rate, band, channel,
+    width, RSSI and noise; <code>if_data.ifi_baudrate</code> for Ethernet speed. Shown as a
+    chip in each panel header, amber when on 2.4 GHz or when the last download reached
+    ≥60 % of the link rate (the local hop is the bottleneck). Sandbox-safe; only the SSID
+    would need Location permission, and it isn't read.</div>
+
+    <h2>Bandwidth test</h2>
+    <p>On a schedule (default every 10 min, first run ~5 s after launch; Off / 1 / 5 / 15 min / hourly
+    from the header menu) or on <em>Test now</em>, each connection is tested in turn: download then upload
+    against Cloudflare, six parallel TLS streams, stopping at 3 s or the byte cap. The
+    test span is recorded as a <code>SpeedWindow</code> and shaded on that link's graph
+    so latency-under-load is visible.</p>
+    <div class="diagram">
+        <div class="mermaid">
+sequenceDiagram
+    participant VM as Speed loop
+    participant NC as NetworkConnection
+    participant ST as SpeedTester
+    participant CF as speed.cloudflare.com
+    loop each connection (skip if 429 back-off)
+        VM->>NC: beginPhase(.download)
+        par 6 streams (requiredInterface)
+            loop keep-alive until stopped
+                ST->>CF: GET /__down?bytes=4MB
+                CF-->>ST: body bytes → TransferMeter
+            end
+        end
+        ST-->>NC: live Mbps (every 250 ms)
+        ST-->>VM: Measurement(mbps, bytes, error)
+        VM->>NC: endPhase · beginPhase(.upload)
+        par 6 streams
+            ST->>CF: POST /__up (Content-Length)
+            CF-->>ST: 200 once body received
+        end
+        VM->>NC: record(SpeedResult) — 429 ⇒ back off 5→30 min
+    end
+</div>
+    </div>
+    <div class="note"><strong>Measurement.</strong> Each direction stops at the first of
+    3 s after first byte, 40 MB ↓ / 15 MB ↑, or all streams done. The rate skips the
+    first 25% (≤ 0.5 s) to exclude TCP slow-start. Cloudflare rejects single requests
+    over 100 MB (403) and, after heavy testing, answers 429 to single downloads of
+    ≥ 10 MB — so each download stream loops 4 MB requests on one keep-alive connection.
+    Any remaining 429 backs that link off.</div>
+
+    <h2>The probe loop</h2>
+    <p>Every second the view model fires every connection × target concurrently in a
+    <code>TaskGroup</code> so a slow or lost host never delays the others, stamps the
+    batch with one shared timestamp (so the ribbons stay time-aligned), and appends a
+    <code>PingSample</code> to each target's rolling history.</p>
+    <div class="diagram">
+        <div class="mermaid">
+sequenceDiagram
+    participant L as runLoop (1 Hz)
+    participant G as TaskGroup
+    participant S as PingService
+    participant H as TargetHealth
+    L->>L: stamp = Date()
+    par each connection × (Router / Dish / Cloudflare)
+        L->>G: addTask measure(host, ports, interfaceIndex)
+        G->>S: measure()
+        S-->>G: Reading(rtt, method) or nil
+    end
+    G-->>L: (index, Reading?)
+    L->>H: append PingSample(date: stamp, rtt, method)
+    H->>H: recompute min/avg/max/jitter/loss/state
+    L->>L: sleep(interval − elapsed)
+</div>
+    </div>
+
+    <h2>Measurement: ICMP → TCP fallback</h2>
+    <p>Real ICMP echo is tried first, but the macOS App Sandbox lets the app create
+    and <em>send</em> on an unprivileged ICMP datagram socket while <strong>denying
+    the inbound reply with <code>EPERM</code></strong>. The service detects that once
+    and permanently falls through to a TCP connect-time probe — the SYN→SYN/ACK round
+    trip, a close proxy for ICMP RTT. Each reading is tagged with the method that
+    produced it (<code>Reading(rtt, method)</code>), which surfaces as an
+    <code>ICMP</code>/<code>TCP</code> badge on every stat card.</p>
+    <div class="diagram">
+        <div class="mermaid">
+graph TD
+    A["measure(host, ports)"] --> B{icmpUsable?}
+    B -->|yes| C["ICMPPinger.ping"]
+    C -->|"RTT"| Z["return Reading(rtt, .icmp)"]
+    C -->|"EPERM (sandbox)"| D["icmpUsable = false"]
+    C -->|"timeout / loss"| E["try TCP"]
+    D --> E
+    B -->|no| E
+    E --> F{"connect to<br/>first open port?"}
+    F -->|yes| X["return Reading(rtt, .tcp)"]
+    F -->|no| Y["return nil → loss"]
+    style Z fill:#10241b,stroke:#3ddc97,color:#e6edf3
+    style X fill:#10241b,stroke:#5ad1ff,color:#e6edf3
+    style Y fill:#241015,stroke:#f0698a,color:#e6edf3
+    style D fill:#241f10,stroke:#f0c84a,color:#e6edf3
+</div>
+    </div>
+    <div class="note"><strong>Why TCP connect time?</strong> It needs no special
+    privilege, works inside the sandbox with only <code>network.client</code>, and a
+    connection-refused on a closed port is effectively instant — so trying a few
+    candidate ports per host is cheap. The per-card badge shows which path is live —
+    on a sandboxed build every card reads <code>TCP</code>.</div>
+
+    <h2>Rendering: the time-scrolling ribbon</h2>
+    <p>The graph is a single SwiftUI <code>Canvas</code> redrawn at 60 fps by a
+    <code>TimelineView</code>. Points are positioned by their real <em>age</em>
+    (<code>now − sample.date</code>) across a fixed 90 s window, so the ribbon scrolls
+    continuously rather than compressing. The leading edge is pinned to the right so
+    the trace glides smoothly instead of sawtoothing as each sample lands.</p>
+    <div class="diagram">
+        <div class="mermaid">
+graph LR
+    A["TimelineView<br/>60 Hz date"] --> B["draw(now)"]
+    B --> C["ease Y-scale<br/>(hysteresis)"]
+    B --> D["x = width − age/window · width"]
+    D --> E["pin latest value<br/>to x = width"]
+    E --> F["Catmull-Rom path"]
+    F --> G["gradient fill + glow + dot"]
+    C --> G
+    style A fill:#10241b,stroke:#5ad1ff,color:#e6edf3
+    style G fill:#10241b,stroke:#3ddc97,color:#e6edf3
+</div>
+    </div>
+
+    <h2>Targets</h2>
+    <table>
+        <tr><th>Name</th><th>Host</th><th>Probe ports</th><th>Meaning</th></tr>
+        <tr><td>Router</td><td><em>that link's gateway</em></td><td>80, 443, 9000</td><td>LAN gateway — local hop (real default route, e.g. 192.168.1.1 on Starlink, 192.168.108.1 on fiber)</td></tr>
+        <tr><td>Dish</td><td>192.168.100.1</td><td>80, 443</td><td>Starlink dish (user terminal) — <strong>optional</strong>; omitted when unreachable</td></tr>
+        <tr><td>Cloudflare</td><td>1.1.1.1</td><td>443, 80</td><td>Public-internet anchor</td></tr>
+    </table>
+    <div class="note"><strong>Any network, not just Starlink.</strong>
+    <code>Gateway.defaultIPv4()</code> reads the kernel routing table via
+    <code>sysctl(NET_RT_DUMP)</code> — the in-process equivalent of
+    <code>route&nbsp;-n&nbsp;get&nbsp;default</code>, and sandbox-safe — so the Router
+    target points at whatever gateway the machine is actually behind. Optional targets
+    (the dish) are only shown once they've answered at least once
+    (<code>TargetHealth.everReachable</code>), so a missing dish is omitted from the
+    cards, the graph, and the overall-health tint rather than dragging the window to
+    "Offline". And because a <code>ECONNREFUSED</code> RST is a full round trip from a
+    live host, <code>TCPPinger</code> counts it as a reading — letting a bare gateway
+    with no open web port still read as a healthy local hop.</div>
+    <div class="note"><strong>The dish is probed gently.</strong> Its gRPC management
+    port <code>9200</code> is deliberately left out — a plain TCP connect on the web
+    ports is enough to time the local hop, and the dish's <code>Handle</code> API
+    endpoint also accepts <code>reboot</code>/<code>stow</code>, so NetHealth never
+    speaks to it. Polling that API too hard appears to be able to crash the dish.</div>
+
+    <h2>Health model</h2>
+    <p><code>HealthState</code> buckets the current latency and drives colour across
+    the whole UI; each panel's border takes its connection's worst target state, and the
+    worst connection tints the ambient background.</p>
+    <table>
+        <tr><th>State</th><th>Latency</th><th>Tint</th></tr>
+        <tr><td>Excellent</td><td>&lt; 20 ms</td><td>green</td></tr>
+        <tr><td>Good</td><td>&lt; 40 ms</td><td>teal</td></tr>
+        <tr><td>Fair</td><td>&lt; 80 ms</td><td>amber</td></tr>
+        <tr><td>Poor</td><td>&lt; 150 ms</td><td>orange</td></tr>
+        <tr><td>Bad</td><td>≥ 150 ms or ≥ 50% loss</td><td>red</td></tr>
+        <tr><td>Offline</td><td>unreachable</td><td>grey</td></tr>
+    </table>
+
+    <footer>
+        NetHealth · See <a href="tutorial.html">tutorial.html</a> for the build narrative
+        and <a href="https://github.com/pcwilliams/nethealth#readme">the README</a> for usage, and <a href="https://github.com/pcwilliams/nethealth">the source on GitHub</a>.
+    </footer>
+</div>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: "dark",
+        themeVariables: {
+            background: "#111a22",
+            primaryColor: "#10241b",
+            primaryTextColor: "#e6edf3",
+            primaryBorderColor: "#3ddc97",
+            lineColor: "#5ad1ff",
+            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif"
+        }
+    });
+</script>
+</body>
+</html>
