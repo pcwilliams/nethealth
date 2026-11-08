@@ -12,7 +12,7 @@ Got Ethernet to one ISP and Wi-Fi to another? NetHealth gives each link its own 
 
 macOS sends ordinary traffic over one "primary" connection, so most tools only ever measure that one. NetHealth pins each probe and speed test to a specific interface, so a second link is measured as itself, not through the first.
 
-It earned its keep quickly. A 5 Gb/s fibre line kept testing at ~140 Mbps over Wi-Fi. The link-rate chip showed why: the Mac had joined the router's **2.4 GHz** band at 137 Mbps. The fibre was fine; the Wi-Fi band was the bottleneck.
+It earned its keep quickly. A 5 Gb/s fibre line kept testing at ~140 Mbps over Wi-Fi. The link-rate chip showed why: the Mac had joined the router's **2.4 GHz** band at 137 Mbps. The fibre was fine; the Wi-Fi band was the bottleneck. (It later moved to 5 GHz, but on a 20 MHz channel with a weaker signal the rate stayed at 137 Mbps: the chip shows that too.)
 
 ## Features
 
@@ -85,14 +85,14 @@ Every networking path can be checked without the GUI:
 NetHealth self-test — 2 connection(s)
   Ethernet  en0  192.168.1.x    gw 192.168.1.1  (primary)
     link  1 Gb/s
-    [OK]   Router      192.168.1.1          0.8 ms  via TCP
-    [OK]   Dish        192.168.100.1        1.3 ms  via TCP
-    [OK]   Cloudflare  1.1.1.1             34.3 ms  via TCP
+    [OK]   Router      192.168.1.1          0.6 ms  via TCP
+    [OK]   Dish        192.168.100.1        1.0 ms  via TCP
+    [OK]   Cloudflare  1.1.1.1             34.6 ms  via TCP
   Wi-Fi  en1  192.168.108.x  gw 192.168.108.1
-    link  172 Mbps · 2.4 GHz ch 11 · −67 dBm  802.11ax (Wi-Fi 6)  20 MHz  noise -96 dBm
-    [OK]   Router      192.168.108.1        2.4 ms  via TCP
+    link  137 Mbps · 5 GHz ch 140 · −74 dBm  802.11ax (Wi-Fi 6)  20 MHz  noise -98 dBm
+    [OK]   Router      192.168.108.1        6.1 ms  via TCP
     [--]   Dish        192.168.100.1    not present (optional)
-    [OK]   Cloudflare  1.1.1.1             14.6 ms  via TCP
+    [OK]   Cloudflare  1.1.1.1             12.2 ms  via TCP
 5 targets reachable (4 required across 2 connection(s))
 ```
 

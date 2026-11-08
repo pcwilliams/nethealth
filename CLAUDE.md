@@ -127,6 +127,11 @@ Instead `LinkReader.read(interfaceName:kind:)` asks the OS, sending nothing:
 - **Finding (2026-10-19):** the Mac's Wi-Fi was on **2.4 GHz ch 11, 20 MHz,
   ~137–172 Mbps PHY, −66 dBm** — exactly why the 5 Gb/s fibre measured
   ~140 Mbps. Joining the router's 5/6 GHz band is the fix, not the app.
+- **Follow-up (2026-11-08):** the Mac is now on **5 GHz ch 140** — but still
+  only **20 MHz wide, 137 Mbps PHY, −74 dBm** (weaker than on 2.4 GHz), so the
+  link rate hasn't moved. The chip no longer goes amber for the band, but
+  `isLinkLimited` will still flag it once a download reaches ~80 Mbps. A wider
+  channel (40/80 MHz) or a stronger signal is what would actually lift it.
 
 ### Works on any network, not just Starlink
 
@@ -274,20 +279,20 @@ instance, and `cp -R`s the signed `.app` into `/Applications`. It sources
 otherwise it relies on the `DEVELOPMENT_TEAM` baked into the project. Verified:
 Release build signs with hardened runtime and `codesign --strict` passes.
 
-Last verified self-test (2026-10-18, Ethernet → Starlink primary + Wi-Fi → fibre):
+Last verified self-test (2026-11-08, Ethernet → Starlink primary + Wi-Fi → fibre):
 
 ```
 NetHealth self-test — 2 connection(s)
   Ethernet  en0  192.168.1.x    gw 192.168.1.1  (primary)
     link  1 Gb/s
-    [OK]   Router      192.168.1.1          0.8 ms  via TCP
+    [OK]   Router      192.168.1.1          0.6 ms  via TCP
     [OK]   Dish        192.168.100.1        1.0 ms  via TCP
-    [OK]   Cloudflare  1.1.1.1             24.5 ms  via TCP
+    [OK]   Cloudflare  1.1.1.1             34.6 ms  via TCP
   Wi-Fi  en1  192.168.108.x  gw 192.168.108.1
-    link  172 Mbps · 2.4 GHz ch 11 · −67 dBm  802.11ax (Wi-Fi 6)  20 MHz  noise -96 dBm
-    [OK]   Router      192.168.108.1       10.0 ms  via TCP
+    link  137 Mbps · 5 GHz ch 140 · −74 dBm  802.11ax (Wi-Fi 6)  20 MHz  noise -98 dBm
+    [OK]   Router      192.168.108.1        6.1 ms  via TCP
     [--]   Dish        192.168.100.1    not present (optional)
-    [OK]   Cloudflare  1.1.1.1             11.4 ms  via TCP
+    [OK]   Cloudflare  1.1.1.1             12.2 ms  via TCP
 5 targets reachable (4 required across 2 connection(s))
 ```
 
